@@ -1,0 +1,11 @@
+services:
+  # A web service for the FastAPI backend
+  - type: web
+    name: polling-website-api
+    env: python
+    buildCommand: pip install -r Backend/Requirements.txt
+    startCommand: cd Backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9
