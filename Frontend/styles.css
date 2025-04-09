@@ -629,3 +629,78 @@ textarea {
 .color-8 { fill: #66bb6a; } /* Lighter green */
 .color-9 { fill: #81c784; } /* Even lighter green */
 .color-10 { fill: #388e3c; } /* Darker green */
+
+/* Dark mode CSS classes - Add these at the end of your CSS file */
+
+/* Dark mode theme variables */
+:root {
+    /* Light mode (default) variables */
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --primary-color: #4a90e2;
+    --secondary-color: #f5f5f5;
+    --border-color: #e0e0e0;
+    --input-background: #ffffff;
+}
+
+/* Dark mode class that can be toggled */
+.dark-mode {
+    --background-color: #1a1a1a;
+    --text-color: #f0f0f0;
+    --primary-color: #5fa8ff;
+    --secondary-color: #333333;
+    --border-color: #444444;
+    --input-background: #2a2a2a;
+}
+
+/* Apply theme variables to elements */
+body.dark-mode {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.dark-mode .poll-section,
+.dark-mode .analytics-card,
+.dark-mode .question-item {
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+}
+
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+    background-color: var(--input-background);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.dark-mode .submit-btn {
+    background-color: var(--primary-color);
+}
+
+/* Dark mode toggle button */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 100;
+}
+
+/* Screen reader only text */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
