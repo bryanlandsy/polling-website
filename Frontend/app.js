@@ -731,3 +731,43 @@ function initApp() {
 // Override the existing event listener with a cleaner implementation
 document.removeEventListener('DOMContentLoaded', initApp);
 document.addEventListener('DOMContentLoaded', initApp, { once: true });
+
+// Dark Mode Toggle Functionality
+function setupDarkModeToggle() {
+    // Create the toggle button
+    const toggleButton = document.createElement('button');
+    toggleButton.className = 'theme-toggle';
+    toggleButton.innerHTML = '🌓';
+    toggleButton.setAttribute('aria-label', 'Toggle Dark Mode');
+    
+    // Add screen reader text
+    const srText = document.createElement('span');
+    srText.className = 'sr-only';
+    srText.textContent = 'Toggle Dark Mode';
+    toggleButton.appendChild(srText);
+    
+    // Add click event to toggle dark mode
+    toggleButton.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        
+        // Save preference to localStorage
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('darkMode', 'enabled');
+        } else {
+            localStorage.setItem('darkMode', 'disabled');
+        }
+    });
+    
+    // Append button to body
+    document.body.appendChild(toggleButton);
+    
+    // Check for saved user preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+    }
+}
+
+// Call the function when the document is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupDarkModeToggle();
+});

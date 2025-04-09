@@ -208,21 +208,310 @@ If you haven't set up your GitHub credentials:
 
 ### Working with Branches
 
-1. Create a new branch for your feature:
+Git branches allow you to develop features, fix bugs, or experiment with new ideas without affecting the main codebase. Here's how to work with branches:
+
+1. List all existing branches:
    ```
-   git checkout -b feature-name
+   git branch          # List local branches
+   git branch -r       # List remote branches
+   git branch -a       # List all branches (local and remote)
    ```
 
-2. Push a new branch to GitHub:
+2. Create a new branch:
    ```
-   git push -u origin feature-name
+   git checkout -b branch-name    # Create and switch to a new branch
    ```
 
 3. Switch between branches:
    ```
-   git checkout branch-name
+   git checkout branch-name       # Switch to an existing branch
+   ```
+
+4. Push a new branch to GitHub:
+   ```
+   git push -u origin branch-name # Push and set upstream for the branch
+   ```
+
+5. Update a branch with changes from master/main:
+   ```
+   git checkout branch-name       # Switch to your branch
+   git merge master               # Merge changes from master into your branch
+   # OR
+   git rebase master              # Rebase your branch on top of master
+   ```
+
+6. Delete a branch:
+   ```
+   git branch -d branch-name      # Delete a local branch (safe)
+   git branch -D branch-name      # Force delete a local branch
+   git push origin --delete branch-name  # Delete a remote branch
+   ```
+
+7. Viewing branch history:
+   ```
+   git log                        # Show commit history
+   git log --graph --oneline --all # Show graphical representation of branches
+   ```
+
+8. Creating a branch for a specific purpose:
+   ```
+   git checkout -b feature/new-login-system   # Feature branch
+   git checkout -b bugfix/header-alignment    # Bug fix branch
+   git checkout -b hotfix/security-issue      # Hot fix branch
+   ```
+
+9. Stashing changes before switching branches:
+   ```
+   git stash                      # Stash current changes
+   git checkout another-branch    # Switch branches
+   git stash pop                  # Apply stashed changes (when you switch back)
    ```
 
 ## License
 
 [Your license information here]
+
+## Git & GitHub Learning Exercises
+
+Use these exercises to practice and build your Git skills within this project. Complete them in order for a structured learning path.
+
+### Basic Exercises
+
+#### Exercise 1: Repository Setup & First Commit
+1. Initialize a Git repository (if not already done):
+   ```
+   git init
+   ```
+2. Create a simple `.gitignore` file for Python and web projects:
+   ```
+   touch .gitignore
+   # Add common entries: __pycache__/, .env, .venv/, etc.
+   ```
+3. Make your first commit with a proper message:
+   ```
+   git add .gitignore
+   git commit -m "chore: add basic gitignore file"
+   ```
+
+#### Exercise 2: Working with Branches
+1. Create and switch to a new feature branch:
+   ```
+   git checkout -b feature/dark-mode
+   ```
+2. Make a simple change to `Frontend/styles.css` (add a dark mode class)
+3. Commit the change with a descriptive message:
+   ```
+   git add Frontend/styles.css
+   git commit -m "feat(ui): add dark mode CSS classes"
+   ```
+4. Switch back to the main branch and verify the changes aren't there:
+   ```
+   git checkout main
+   # Check that your dark mode classes are not in the file
+   ```
+5. Switch back to your feature branch:
+   ```
+   git checkout feature/dark-mode
+   ```
+
+#### Exercise 3: Merging Changes
+1. Switch to the main branch:
+   ```
+   git checkout main
+   ```
+2. Merge your feature branch:
+   ```
+   git merge feature/dark-mode
+   ```
+3. Verify the changes from your feature branch are now in main
+4. Use a tag to mark this version:
+   ```
+   git tag -a v0.2 -m "Version with dark mode support"
+   ```
+
+#### Exercise 4: Resolving Conflicts
+1. Create two new branches from main:
+   ```
+   git checkout -b feature/update-header
+   git checkout -b feature/modify-header
+   ```
+2. In `feature/update-header`, modify the header in `Frontend/index.html`
+3. Commit your changes and switch to the other branch:
+   ```
+   git add Frontend/index.html
+   git commit -m "feat(ui): update header with new logo"
+   git checkout feature/modify-header
+   ```
+4. In `feature/modify-header`, modify the same section of the header differently
+5. Commit your changes:
+   ```
+   git add Frontend/index.html
+   git commit -m "feat(ui): modify header layout"
+   ```
+6. Switch back to main and merge the first branch:
+   ```
+   git checkout main
+   git merge feature/update-header
+   ```
+7. Try to merge the second branch and resolve the conflict:
+   ```
+   git merge feature/modify-header
+   # Resolve conflicts manually in the files
+   git add Frontend/index.html
+   git commit -m "merge: resolve header conflicts"
+   ```
+
+### Intermediate Exercises
+
+#### Exercise 5: Working with Remote Repositories
+1. Add your GitHub repository as a remote (if not already done):
+   ```
+   git remote add origin https://github.com/yourusername/Polling-Website.git
+   ```
+2. Push your local main branch to GitHub:
+   ```
+   git push -u origin main
+   ```
+3. Push your local tags:
+   ```
+   git push origin --tags
+   ```
+4. Push your feature branches:
+   ```
+   git push origin feature/dark-mode
+   ```
+
+#### Exercise 6: Pull Requests
+1. On GitHub.com, create a pull request from one of your feature branches to main
+2. Add a detailed description explaining the changes
+3. Review your own code on GitHub's interface
+4. If working with others, request a review
+5. Merge the PR on GitHub
+
+#### Exercise 7: Using GitHub Issues
+1. Create an issue for a new feature: "Add user authentication"
+2. Create a branch related to this issue:
+   ```
+   git checkout -b feature/issue-1-user-auth
+   ```
+3. Make some placeholder changes in the appropriate files
+4. Commit with a reference to the issue:
+   ```
+   git commit -m "feat(auth): begin work on user authentication system, ref #1"
+   ```
+5. Push the branch to GitHub:
+   ```
+   git push -u origin feature/issue-1-user-auth
+   ```
+6. Create a PR and link it to the issue in the description: "Resolves #1"
+
+#### Exercise 8: Using git stash
+1. Start making changes to `Backend/main.py` (add comments or functionality)
+2. Realize you need to switch branches before committing:
+   ```
+   git stash save "Work in progress on authentication backend"
+   ```
+3. Switch to another branch, then switch back:
+   ```
+   git checkout main
+   git checkout feature/issue-1-user-auth
+   ```
+4. Apply your stashed changes:
+   ```
+   git stash list             # See all stashes
+   git stash apply stash@{0}  # Apply the most recent stash
+   # OR
+   git stash pop              # Apply and remove the most recent stash
+   ```
+
+### Advanced Exercises
+
+#### Exercise 9: Rebasing
+1. Create a new branch off main:
+   ```
+   git checkout -b feature/data-export
+   ```
+2. Make several small commits (at least 3) for different aspects of the feature
+3. Meanwhile, switch to main and make a change:
+   ```
+   git checkout main
+   # Make a small change
+   git commit -am "fix: update API response format"
+   ```
+4. Go back to your feature branch and rebase on main:
+   ```
+   git checkout feature/data-export
+   git rebase main
+   ```
+5. Observe how your commits are now applied on top of the latest main
+
+#### Exercise 10: Squashing Commits
+1. Look at your commit history:
+   ```
+   git log --oneline
+   ```
+2. Use interactive rebase to squash some commits:
+   ```
+   git rebase -i HEAD~3  # Replace 3 with the number of commits back you want to go
+   ```
+3. In the editor, change "pick" to "squash" or "s" for commits you want to combine
+4. Save and provide a new commit message for the combined commit
+
+#### Exercise 11: Git Hooks
+1. Create a simple pre-commit hook:
+   ```
+   mkdir -p .git/hooks
+   touch .git/hooks/pre-commit
+   chmod +x .git/hooks/pre-commit
+   ```
+2. Add a simple script to check for certain patterns before committing
+
+#### Exercise 12: GitHub Actions
+1. Create a `.github/workflows` directory:
+   ```
+   mkdir -p .github/workflows
+   ```
+2. Create a simple CI workflow file:
+   ```
+   touch .github/workflows/ci.yml
+   ```
+3. Add a basic GitHub Action to run tests when code is pushed
+4. Push this change to GitHub and observe the workflow running
+
+### Project Management Exercises
+
+#### Exercise 13: GitHub Projects
+1. Create a Project board on GitHub for your repository
+2. Add columns: To Do, In Progress, Review, Done
+3. Create several issues and add them to the board
+4. Practice moving issues between columns as you work on them
+
+#### Exercise 14: Releases & Versioning
+1. Create a changelog file:
+   ```
+   touch CHANGELOG.md
+   ```
+2. Document changes for version 1.0.0
+3. Tag this version:
+   ```
+   git tag -a v1.0.0 -m "Release version 1.0.0"
+   ```
+4. Push the tag:
+   ```
+   git push origin v1.0.0
+   ```
+5. On GitHub, create a Release based on this tag
+
+#### Exercise 15: Contributing Guidelines
+1. Create a contributing guide:
+   ```
+   touch CONTRIBUTING.md
+   ```
+2. Document how others can contribute to your project
+3. Include guidelines for:
+   - Code style
+   - Commit message format
+   - Pull request process
+4. Commit and push this file
+
+These exercises progress from basic to advanced Git and GitHub concepts. Work through them at your own pace to build proficiency with Git and GitHub workflows.
