@@ -65,6 +65,118 @@ Render offers a free tier that's perfect for FastAPI applications:
 
 Note: The free tier may sleep after inactivity, causing slow initial responses.
 
+## Detailed Guide: Hosting Your Backend on Render
+
+### Prerequisites
+- A GitHub account with your project pushed to a repository
+- A valid credit card (for account verification, even though you'll use the free tier)
+- Your FastAPI backend code in the `Backend` directory
+
+### Step 1: Create a Render Account
+1. Visit [render.com](https://render.com/) and click "Sign Up"
+2. You can sign up using your GitHub account for easier repository access
+3. Verify your email address if required
+
+### Step 2: Connect Your GitHub Repository
+1. Once logged in, click the "New +" button in the top right corner
+2. Select "Web Service" from the dropdown menu
+3. Choose "Connect a repository" if you signed up with GitHub, or "Public Git repository" otherwise
+4. Find and select your Polling-Website repository
+5. If you didn't sign up with GitHub, you'll need to paste your repository URL
+
+### Step 3: Configure Your Web Service
+1. Fill out the configuration form with the following details:
+   - **Name**: `polling-website-backend` (or a name of your choice)
+   - **Region**: Choose the region closest to your users
+   - **Branch**: `main` (or your default branch)
+   - **Root Directory**: If your backend is in a subdirectory, enter `Backend` here
+   - **Runtime**: Select `Python 3`
+   - **Build Command**: `pip install -r Requirements.txt`
+   - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - **Plan**: Select `Free`
+
+2. If your Requirements.txt file is in the Backend directory, adjust the build command to:
+   ```
+   pip install -r Backend/Requirements.txt
+   ```
+
+3. Advanced settings (optional):
+   - Click "Advanced" to configure environment variables if needed
+   - You can add variables like `DATABASE_URL` if you're using a database service
+
+### Step 4: Deploy Your Service
+1. Click "Create Web Service" at the bottom of the form
+2. Wait for the deployment process to complete (this may take a few minutes)
+3. Render will provide you with a URL (ending in `.onrender.com`) when the deployment is successful
+
+### Step 5: Configure CORS in Your Backend
+1. Update your `main.py` file with the proper CORS configuration to allow your frontend to communicate with your backend:
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "https://bryanlandsy.github.io",  # Your GitHub Pages URL
+    "http://localhost:8000",          # For local development
+    "https://yourusername.github.io"  # Replace with your actual GitHub Pages domain
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+### Step 6: Update Your Frontend Configuration
+1. In your frontend code, update the API URL to point to your new Render URL
+2. For example, if your fetch calls look like:
+   ```javascript
+   fetch('http://localhost:8000/api/polls')
+   ```
+   Change them to:
+   ```javascript
+   fetch('https://polling-website-backend.onrender.com/api/polls')
+   ```
+
+### Step 7: Verify Your Deployment
+1. Test your API by visiting `https://polling-website-backend.onrender.com/docs` (replacing with your actual Render URL)
+2. This will open the automatic Swagger documentation for your FastAPI backend
+3. Try out some endpoints to ensure everything is working correctly
+
+### Important Notes About Render Free Tier
+- Free tier services will "sleep" after 15 minutes of inactivity
+- The first request after inactivity may take up to 30 seconds to respond
+- You get 750 hours of free usage per month
+- Your service might not be suitable for production use on the free tier if you need consistent responsiveness
+- For a production environment with many users, consider upgrading to a paid plan
+
+### Troubleshooting Common Issues
+1. **Deployment Failures**:
+   - Check the build logs in Render for specific error messages
+   - Ensure your Requirements.txt file contains all necessary dependencies
+   - Verify the Python version compatibility
+
+2. **CORS Errors**:
+   - Double-check the CORS configuration in your FastAPI app
+   - Ensure your frontend's domain is listed in the `origins` list
+   - Check browser console for specific CORS error messages
+
+3. **Database Connectivity**:
+   - If using a database, ensure connection strings are properly set in environment variables
+   - For SQLite, ensure the database file is in a writable location
+
+4. **Custom Domain Setup**:
+   - Under your service settings, you can configure a custom domain if needed
+   - This requires verification and DNS configuration
+
+### Monitoring Your Service
+- Render provides built-in logging and monitoring tools
+- Access logs by clicking on your service and selecting the "Logs" tab
+- Set up notifications for deployment failures or when your service goes down
+
 #### 2. Railway.app
 
 Railway offers a free starter plan with usage limits:
@@ -151,6 +263,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 ```
+
+## Local Backend Hosting
+
+You can host the backend on your local computer for small to medium polling events (up to ~100 users):
+
+### Requirements
+- Computer with stable internet connection
+- Public IP address or port forwarding configured on your router
+- Python 3.9+ installed
+
+### Setup Steps
+1. Ensure your computer is connected to the internet with a stable connection
+2. Find your public IP address (visit https://whatismyip.com/)
+3. Configure port forwarding on your router:
+   - Forward external port 8000 to internal port 8000 on your computer's local IP
+   - Consult your router's manual for specific instructions
+
+4. Run the backend server:
+   ```
+   cd Backend
+   pip install -r Requirements.txt
+   uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+
+5. Your API is now accessible at `http://YOUR_PUBLIC_IP:8000`
+   - Update your frontend configuration to point to this URL
+
+### Performance Considerations
+- A modern laptop/desktop should handle 100 simultaneous users for basic polling
+- SQLite (the default database) can handle this load for read-heavy operations
+- Keep your computer plugged in and prevent it from sleeping
+- Consider using a tool like [PM2](https://pm2.keymetrics.io/) or [screen](https://www.gnu.org/software/screen/) to keep the server running if you close your terminal
+- For reliability during important events, a cloud hosting solution is still recommended
+
+### Security Considerations
+- This exposes your computer directly to the internet - only do this on a secured machine
+- Consider setting up basic authentication for the API
+- Use HTTPS if possible (requires additional setup with certificates)
+- Disable the server when not in use
 
 ## Development Setup
 
