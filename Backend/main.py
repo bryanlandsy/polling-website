@@ -26,6 +26,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add a root endpoint
+@app.get("/")
+def read_root():
+    return {
+        "message": "Welcome to the Polling Website API",
+        "endpoints": [
+            {"path": "/poll", "methods": ["GET", "POST"], "description": "Get poll questions or submit poll answers"},
+            {"path": "/analytics", "methods": ["GET"], "description": "Get analytics for poll responses"}
+        ]
+    }
+
 # Dependency to get DB session
 def get_db():
     db = SessionLocal()
