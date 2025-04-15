@@ -18,31 +18,56 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Add CORS middleware with very permissive settings for debugging
+# Configure for CORS
+origins = [
+    "https://bryanlandsy.github.io",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:5500",
+    "http://localhost:3000",
+    "*"  # Include wildcard for testing
+]
+
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins temporarily for debugging
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
+    max_age=86400,  # Cache preflight requests for 24 hours
 )
 
-# Custom middleware to add CORS headers as a fallback
+# Define response headers for all responses
 @app.middleware("http")
 async def add_cors_headers(request: Request, call_next):
     response = await call_next(request)
+    
+    # Add CORS headers to every response
     response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    
+    # Add debugging headers to see in browser
+    response.headers["X-Debug-CORS"] = "Applied by middleware"
+    
     return response
 
-# Add OPTIONS handler for each route to properly handle CORS preflight requests
+# Global OPTIONS handler
 @app.options("/{full_path:path}")
-async def options_handler(request: Request):
-    response = JSONResponse(content={"message": "OK"})
-    return response
+async def options_handler(request: Request, full_path: str):
+    return JSONResponse(
+        content={"message": "CORS preflight response"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Max-Age": "86400",
+            "X-Debug-Path": full_path  # Debug header
+        }
+    )
 
 # Add a root endpoint
 @app.get("/")
@@ -210,8 +235,8 @@ def calculate_differential(pre_stats, post_stats, question_type):
 
 @app.get("/poll")
 def get_poll():
-    # Gen Z Mental Health poll questions
-    poll_questions = {
+    # Add debug headers specifically for this route
+    response = JSONResponse(content={
         "title": "Gen Z Mental Health Poll",
         "description": "For the following questions rate how much you agree or disagree with each item.",
         "scale_description": "1 - Strongly Disagree, 2 - Disagree, 3 - Agree, 4 - Strongly Agree",
@@ -270,13 +295,28 @@ def get_poll():
                 "required": False
             }
         ]
-    }
-    return poll_questions
+    })
+    
+    # Add explicit CORS headers to this specific response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["X-Debug-Route"] = "/poll"  # Debug header
+    
+    return response
 
 @app.post("/poll")
 def submit_poll(poll: PollAnswers, db: Session = Depends(get_db)):
     response = crud.create_poll_response(db, poll.poll_type, poll.answers)
-    return {"status": "success", "response_id": response.id}
+    return JSONResponse(
+        content={"status": "success", "response_id": response.id}, 
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "X-Debug-Route": "/poll (POST)"  # Debug header
+        }
+    )
 
 @app.get("/analytics")
 def get_analytics(db: Session = Depends(get_db)):
@@ -339,12 +379,23 @@ def get_analytics(db: Session = Depends(get_db)):
     }
     
     # Add question metadata for reference
-    poll_data = get_poll()
-    question_lookup = {q["id"]: q for q in poll_data["questions"]}
+    question_lookup = {
+        "q1": {"question": "There is a mental health crisis among Gen Z.", "type": "rating"},
+        "q2": {"question": "Frequent social media use negatively affects mental health.", "type": "rating"},
+        "q3": {"question": "Mental health is worse for Gen Z than previous generations.", "type": "rating"},
+        "q4": {"question": "What do you think are the biggest causes of mental heath problems among Gen Z.", "type": "checkbox"},
+        "q5": {"question": "If you believe there is a Gen Z mental health crisis, what suggestions/solutions would you recommend?", "type": "text"}
+    }
     
     for q_id, stats in analytics["questions"].items():
         if q_id in question_lookup:
             stats["question_text"] = question_lookup[q_id]["question"]
             stats["question_type"] = question_lookup[q_id]["type"]
     
-    return analytics
+    response = JSONResponse(content=analytics)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["X-Debug-Route"] = "/analytics"  # Debug header
+    
+    return response
