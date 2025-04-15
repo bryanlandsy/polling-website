@@ -17,10 +17,16 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Add CORS middleware
+# Add CORS middleware with specific origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=[
+        "https://bryanlandsy.github.io",  # GitHub Pages site
+        "http://localhost:8000",          # Local development
+        "http://127.0.0.1:8000",          # Local development alternative
+        "http://localhost:5500",          # Live Server extension
+        "http://localhost:3000"           # Common local development port
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
