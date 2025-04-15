@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import models, crud, database
 from database import SessionLocal, engine
@@ -17,20 +18,31 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Add CORS middleware with specific origins
+# Add CORS middleware with very permissive settings for debugging
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://bryanlandsy.github.io",  # GitHub Pages site
-        "http://localhost:8000",          # Local development
-        "http://127.0.0.1:8000",          # Local development alternative
-        "http://localhost:5500",          # Live Server extension
-        "http://localhost:3000"           # Common local development port
-    ],
+    allow_origins=["*"],  # Allow all origins temporarily for debugging
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Custom middleware to add CORS headers as a fallback
+@app.middleware("http")
+async def add_cors_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    return response
+
+# Add OPTIONS handler for each route to properly handle CORS preflight requests
+@app.options("/{full_path:path}")
+async def options_handler(request: Request):
+    response = JSONResponse(content={"message": "OK"})
+    return response
 
 # Add a root endpoint
 @app.get("/")
