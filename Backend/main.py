@@ -46,6 +46,7 @@ async def options_handler(request: Request):
 
 # Add a root endpoint
 @app.get("/")
+@app.head("/")
 def read_root():
     return {
         "message": "Welcome to the Polling Website API",
