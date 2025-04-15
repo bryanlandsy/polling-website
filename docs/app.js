@@ -1,7 +1,7 @@
 // API endpoint base URL - dynamically set based on environment
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'  // Local development
-    : (window.BACKEND_URL || 'https://polling-website-api.onrender.com');  // Replace with your actual deployed URL
+    : (window.BACKEND_URL || 'https://polling-website-backend.onrender.com');  // Updated to match actual Render URL
 
 // DOM elements
 const navPrePoll = document.getElementById('nav-pre-poll');
